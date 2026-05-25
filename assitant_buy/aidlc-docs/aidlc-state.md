@@ -4,7 +4,7 @@
 - **Project Name**: Assistent Buy AI Agent
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-23T21:43:00Z
-- **Current Stage**: INCEPTION — Units Generation
+- **Current Stage**: INCEPTION — Units Generation (Pendiente Aprobación)
 
 ## Workspace State
 - **Existing Code**: No

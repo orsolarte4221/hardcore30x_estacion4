@@ -9,14 +9,14 @@
 ### PART 1 — Planning
 - [x] Contexto cargado (requirements + stories + application-design)
 - [x] Plan creado con preguntas
-- [ ] Respuestas recibidas y analizadas
-- [ ] Plan aprobado por usuario
+- [x] Respuestas recibidas y analizadas
+- [x] Plan aprobado por usuario
 
 ### PART 2 — Generation
-- [ ] `unit-of-work.md` generado
-- [ ] `unit-of-work-dependency.md` generado
-- [ ] `unit-of-work-story-map.md` generado
-- [ ] Code organization strategy documentada
+- [x] `unit-of-work.md` generado
+- [x] `unit-of-work-dependency.md` generado
+- [x] `unit-of-work-story-map.md` generado
+- [x] Code organization strategy documentada
 - [ ] Units aprobadas por usuario
 
 ---
@@ -66,7 +66,7 @@ C) Separar U-02 en dos — Ingesta (C-01, C-12) y Sanitización (C-02, C-16) deb
 D) Separar U-03 en dos — Extracción (C-03, C-11, C-16) y Cruce (C-04) son equipos/preocupaciones distintas  
 X) Otro (describa después del tag [Answer]:)
 
-[Answer]: 
+[Answer]: A
 
 ---
 
@@ -78,7 +78,7 @@ B) Integrado por unidad — cada unidad backend (U-01 a U-06) incluye sus vistas
 C) Frontend paralelo — el frontend se desarrolla en paralelo con un API mock/stub, y se integra después de que el backend esté completo  
 X) Otro (describa después del tag [Answer]:)
 
-[Answer]: 
+[Answer]: A
 
 ---
 
@@ -92,7 +92,7 @@ B) Paralelo controlado — U-01 primero (fundación), luego U-02 y U-06 en paral
 C) Máximo paralelismo — U-01 primero, todo lo demás en paralelo usando interfaces/mocks para las dependencias  
 X) Otro (describa después del tag [Answer]:)
 
-[Answer]: 
+[Answer]: B
 
 ---
 
@@ -106,7 +106,7 @@ B) Por módulo de negocio — `app/ingesta/`, `app/extraccion/`, `app/aclaracion
 C) Híbrido — módulos de negocio para los componentes core, capas técnicas para los transversales: `app/core/` (auth, config, logging), `app/modules/ingesta/`, `app/modules/extraccion/`, etc.  
 X) Otro (describa después del tag [Answer]:)
 
-[Answer]: 
+[Answer]: C
 
 ---
 
@@ -118,7 +118,7 @@ B) Cada módulo define sus propios modelos internos + hay DTOs compartidos en `a
 C) Todos los modelos en `app/models/` (single directory) — aprovechando que es un monolito y no hay riesgo de acoplamiento entre servicios  
 X) Otro (describa después del tag [Answer]:)
 
-[Answer]: 
+[Answer]: A
 
 ---
 
@@ -130,7 +130,7 @@ B) Archivo `config.py` centralizado — una clase de configuración que lee de v
 C) Secrets manager cloud (ej: AWS Secrets Manager, GCP Secret Manager) desde el inicio — sin archivos `.env` en ningún ambiente  
 X) Otro (describa después del tag [Answer]:)
 
-[Answer]: 
+[Answer]: A
 
 ---
 
@@ -144,7 +144,7 @@ B) Modelo de dominio unificado — todas las unidades comparten los mismos model
 C) Modelo de dominio unificado con eventos de dominio — modelos compartidos pero las unidades se notifican entre sí via eventos internos (prepare for future decomposition)  
 X) Otro (describa después del tag [Answer]:)
 
-[Answer]: 
+[Answer]: B
 
 ---
 
