@@ -118,3 +118,44 @@
 **Context**: CONSTRUCTION PHASE — U-01 Fundación — Infrastructure Design GENERADO
 
 ---
+
+## U-01 Infrastructure Design — APROBADO
+**Timestamp**: 2026-05-26T16:22:00Z  
+**User Input**: "No vamos a generar el código. Vamos a pasar al diseño de la siguiente unidad. Vamos a dejar todas las unidades diseñadas hasta antes del código. Seguimos con la siguiente Unidad."  
+**Status**: Aprobado — proceeding to U-02 Functional Design  
+**Context**: CONSTRUCTION PHASE — U-01 Fundación — COMPLETADA (Functional Design + NFR Requirements + Infrastructure Design). Decisión del usuario: completar diseño de todas las unidades antes de generar código.
+
+---
+
+## U-02 Ingesta y Sanitización — Functional Design INICIADO
+**Timestamp**: 2026-05-26T16:22:00Z  
+**AI Response**: Iniciando Functional Design de U-02. Generando plan de preguntas para dominio de ingesta, sanitización Zero Trust y gateway de Document AI.  
+**Context**: CONSTRUCTION PHASE — U-02 Ingesta y Sanitización — Functional Design START
+
+---
+## U-02 Ingesta y Sanitización — Functional Design APROBADO
+**Timestamp**: 2026-05-26T21:33:00Z  
+**User Input**: "Aceptemos los cambios y continuemos con NFR Requirements"  
+**AI Response**: Functional Design aprobado con correcciones arquitectónicas: (1) Descarga de PDFs vía API REST del SAB (`GET /cotizacion/documentos/descargar/{id}`), no filesystem. (2) Autenticación vía Keycloak OAuth2 ROPC con service account de solo consulta (`GestorTokenSAB`). Estructura `DocumentoPDFSAB` y `TokenSABSession` documentadas. Variables de entorno `SAB_KEYCLOAK_URL`, `SAB_CLIENT_ID`, `SAB_CLIENT_SECRET`, `SAB_SERVICE_USERNAME`, `SAB_SERVICE_PASSWORD` requeridas. Iniciando NFR Requirements de U-02.  
+**Status**: APROBADO  
+**Context**: CONSTRUCTION PHASE — U-02 Ingesta y Sanitización — Functional Design APROBADO → NFR Requirements INICIO
+
+---
+
+## U-02 Ingesta y Sanitización — NFR Requirements APROBADO
+**Timestamp**: 2026-05-26T22:06:00Z  
+**User Input**: "Listo. Continuamos con la Infraestructura Design"  
+**AI Response**: NFR Requirements aprobado con decisiones clave: (1) Amazon Textract para OCR de PDFs escaneados (via aiobotocore, mismo IAM Role que S3). (2) Texto OCR guardado en S3 como companion file `.txt` (no en BD). (3) OCR integrado en U-02 antes de sanitización (RT2/RT3). Iniciando Infrastructure Design de U-02.  
+**Status**: APROBADO  
+**Context**: CONSTRUCTION PHASE — U-02 Ingesta y Sanitización — NFR Requirements APROBADO → Infrastructure Design INICIO
+
+---
+
+## U-02 Ingesta y Sanitización — Infrastructure Design APROBADO
+**Timestamp**: 2026-05-26T22:39:00Z  
+**User Input**: "Vamos a aprobar el diseño de infraestructura, pero no pasaremos a code generation aún. Por ahora lo dejaremos allí"  
+**AI Response**: Infrastructure Design aprobado. App Runner 2vCPU/4GB, Amazon Textract para OCR (sin nueva librería), S3 companion files `.txt` para texto OCR, 2 nuevos Secrets Manager secrets (sab/keycloak + sab/db), 3 nuevas CloudWatch alarms. Proyecto en pausa antes de Code Generation.  
+**Status**: APROBADO. **PAUSADO antes de Code Generation.**  
+**Context**: CONSTRUCTION PHASE — U-02 Ingesta y Sanitización — Infrastructure Design APROBADO — PAUSADO
+
+---
