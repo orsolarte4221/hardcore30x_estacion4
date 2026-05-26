@@ -4,7 +4,7 @@
 - **Project Name**: Assistent Buy AI Agent
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-23T21:43:00Z
-- **Current Stage**: INCEPTION — Units Generation (Pendiente Aprobación)
+- **Current Stage**: CONSTRUCTION PHASE — U-01 Fundación — Infrastructure Design
 
 ## Workspace State
 - **Existing Code**: No
@@ -30,4 +30,8 @@
 - [x] User Stories — COMPLETED (2026-05-23T23:07:00Z)
 - [x] Workflow Planning — COMPLETED (2026-05-23T23:29:00Z)
 - [x] Application Design — COMPLETED (2026-05-24T12:45:00Z)
-- [/] Units Generation — IN PROGRESS
+- [x] Units Generation — COMPLETADO (2026-05-25T21:36:00Z)
+- [/] Construction Phase — IN PROGRESS
+  - [x] U-01 Functional Design — COMPLETADO (2026-05-26T01:14:00Z)
+  - [x] U-01 NFR Requirements — COMPLETADO (2026-05-26T01:38:00Z)
+  - [/] U-01 Infrastructure Design — GENERADO, pendiente aprobación (2026-05-26T02:03:00Z)

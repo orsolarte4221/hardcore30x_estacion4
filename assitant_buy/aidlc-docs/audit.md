@@ -73,3 +73,48 @@
 **Context**: INCEPTION PHASE — Units Generation — PART 2 Generación completada. Esperando aprobación del usuario para transicionar a CONSTRUCTION PHASE.
 
 ---
+
+## U-01 Functional Design — COMPLETADO Y APROBADO
+**Timestamp**: 2026-05-26T01:14:00Z  
+**User Input**: "Avancemos al siguiente fase" → "continua"  
+**AI Response**: 3 artefactos generados en `aidlc-docs/construction/u01-fundacion/functional-design/`:
+- `domain-entities.md`: 8 entidades (Usuario, Portafolio, Cotizacion, DocumentoPDF, VariableExtraida, Discrepancia, Aclaracion, AuditTrail) + tabla pivot. UUID v7, borrado físico, campo `analisis` en VariableExtraida.
+- `business-rules.md`: 24 reglas BR-01 a BR-24 cubriendo Auth, BD, API REST y WebSocket. Matriz de permisos 4 roles. AuditTrail append-only con trigger PostgreSQL.
+- `business-logic-model.md`: Flujos detallados OAuth2 PKCE, pipeline de middlewares, repositorios por entidad, 6 eventos WebSocket (ANALISIS_COMPLETADO + ALERTA_SEGURIDAD incluidos).
+**Status**: Aprobado — proceeding to NFR Requirements  
+**Context**: CONSTRUCTION PHASE — U-01 Fundación — Functional Design COMPLETADO
+
+
+## U-01 NFR Requirements — COMPLETADO Y APROBADO
+**Timestamp**: 2026-05-26T01:38:00Z  
+**User Input**: "Aprobamos NFR RQUERIMIENTOS"  
+**AI Response**: 2 artefactos generados en `aidlc-docs/construction/u01-fundacion/nfr-requirements/`:
+- `nfr-requirements.md`: SLAs definidos (<1s API p95, <5s OAuth2 completo, <2s WS), 99% uptime mensual, backup diario PostgreSQL, retry 3x backoff exponencial en pipeline IA, AuditTrail retención 1 año activo + 5 años archivo, logs sin datos sensibles, 80% cobertura tests mínima.
+- `tech-stack-decisions.md`: Python 3.12 + pip + requirements.txt, FastAPI 0.115.x + Uvicorn 4 workers, PostgreSQL 16 managed + SQLAlchemy 2.x async + asyncpg + Alembic, authlib (OAuth2 PKCE) + python-jose (JWT), Docker + Docker Compose.
+**Status**: Aprobado — proceeding to Infrastructure Design  
+**Context**: CONSTRUCTION PHASE — U-01 Fundación — NFR Requirements COMPLETADO
+
+---
+
+## U-01 Infrastructure Design — GENERADO (Pendiente Aprobación)
+**Timestamp**: 2026-05-26T02:03:00Z  
+**User Input**: "Todas las respuestas han sido confirmadas. Continua."  
+**AI Response**: 3 artefactos generados en `aidlc-docs/construction/u01-fundacion/infrastructure-design/` y `aidlc-docs/construction/`:
+- `infrastructure-design.md`: Mapping completo de componentes lógicos a servicios AWS. App Runner (CaaS, 1 vCPU/2 GB, 1–3 instancias), RDS PostgreSQL 16 (db.t4g.micro, VPC privada), S3 (PDFs, Presigned URLs, SSE-S3), CloudWatch Logs (stdout automático), asyncio BackgroundTasks (in-process, sin Celery/Redis), GitHub Actions CI/CD (tests→build→push ECR→deploy App Runner). Estimación piloto: ~$45–70 USD/mes.
+- `deployment-architecture.md`: Diagramas ASCII de arquitectura producción (App Runner + RDS + S3 + CloudWatch), arquitectura development (docker-compose), pipeline CI/CD, flujo OAuth2 PKCE, flujo WebSocket. Tabla de endpoints por ambiente.
+- `shared-infrastructure.md`: Infraestructura base compartida U-01→U-07. Plataforma monolito modular. Regla: U-02 a U-07 documentan solo adiciones específicas.
+
+**Decisiones tomadas**:
+- Proveedor: AWS (App Runner + RDS + S3 + CloudWatch + ECR + Secrets Manager)
+- Ambientes: development (local, docker-compose) + production (AWS)
+- SSL: ACM gestionado por App Runner (equivalente a Let's Encrypt, sin certbot)
+- Sin API Gateway adicional — rate limiting en FastAPI, LB integrado en App Runner
+- Logs: CloudWatch Logs (stdout automático del contenedor)
+- Alertas: CloudWatch Alarm en healthcheck `/health` (≥3 fallos consecutivos → SNS)
+- Infra compartida: U-01 define base para todas las unidades
+- CI/CD: GitHub Actions completo (CI tests + CD deploy automatizado)
+
+**Status**: Generado — Esperando aprobación del usuario  
+**Context**: CONSTRUCTION PHASE — U-01 Fundación — Infrastructure Design GENERADO
+
+---
