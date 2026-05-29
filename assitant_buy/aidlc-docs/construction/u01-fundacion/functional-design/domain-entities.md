@@ -4,6 +4,23 @@
 > **Fase**: CONSTRUCTION — Functional Design  
 > **Fecha**: 2026-05-25  
 
+> ⚠️ **DELTAS PENDIENTES — APLICAR ANTES DE CODE GENERATION**
+>
+> Tras la revisión de U-03 Functional Design (2026-05-28), emergieron cambios requeridos en este modelo. Están documentados en [`../../u03-extraccion/functional-design/cross-unit-deltas.md`](../../u03-extraccion/functional-design/cross-unit-deltas.md) **§1**.
+>
+> **Resumen de deltas**:
+> - 5 entidades nuevas: `CatalogoVariable`, `LlamadaLLM`, `SolicitudCotizacion`, `ItemSolicitud`, `ItemCotizado`
+> - `Portafolio`: composite key SAB + `radicado_referencia`
+> - `Cotizacion`: campos snapshot SAB + `OMITIDA` en `estado_analisis`
+> - `DocumentoPDF`: 7 campos nuevos (`tipo_documento_clasificado`, `confianza_clasificacion`, etc.)
+> - `VariableExtraida`: campo `fuente_consolidacion` JSONB
+> - `Discrepancia`: tipo `INCONSISTENCIA_ARITMETICA` + `item_cotizado_id`
+> - 11 eventos nuevos en `AuditTrail`
+>
+> **Estos deltas se aplicarán formalmente al iniciar Code Generation de U-01** (paso 1 del plan de Code Generation): leer el archivo de deltas, refrescar este Functional Design, re-validar con el usuario, luego generar código.
+>
+> Durante el diseño de unidades posteriores (U-04..U-07), **asumir que los deltas ya están aplicados** a este modelo.
+
 ---
 
 ## Principios del Modelo de Dominio

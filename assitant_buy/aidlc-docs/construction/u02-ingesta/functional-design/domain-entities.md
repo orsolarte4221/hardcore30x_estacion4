@@ -5,6 +5,22 @@
 > **Fecha**: 2026-05-26  
 > **Componentes**: C-01 IngestaConector, C-02 SanitizadorZeroTrust, C-12 RepositorioSAB, C-16 GatewayDocumentAI
 
+> ⚠️ **DELTAS PENDIENTES — APLICAR ANTES DE CODE GENERATION**
+>
+> Tras la revisión de U-03 Functional Design (2026-05-28), U-02 absorbe cambios significativos. Documentados en [`../../u03-extraccion/functional-design/cross-unit-deltas.md`](../../u03-extraccion/functional-design/cross-unit-deltas.md) **§2**.
+>
+> **Resumen de deltas**:
+> - ❌ Eliminar `ParserExcelSAB` (los datos estructurados ya están en BD SAB en `cotizacion_item`)
+> - `RepositorioSAB`: expandir con 8 queries directas a tablas SAB reales (`solicitud_bienes`, `solicitud_cotizacion`, `cotizacion_item`, `cotizacion_documento`, `porcentaje_iva`, etc.)
+> - `GatewaySAB`: reducir a solo descarga de binarios
+> - Nuevo endpoint `POST /portafolios/from-sab` invocado desde SAB UI con tripleta composite key
+> - Persistencia jerárquica transaccional: Portafolio → SolicitudCotizacion → ItemSolicitud → Cotizacion → ItemCotizado → DocumentoPDF
+> - Nuevo estado `EXCEL_INVALIDO` reemplazado por validación BD `SIN_ITEMS`
+>
+> **Aplicación**: al iniciar Code Generation de U-02 (paso 1 del plan).
+>
+> Durante el diseño de U-04..U-07, asumir el modelo refinado.
+
 ---
 
 ## Nota de Alineación con U-01

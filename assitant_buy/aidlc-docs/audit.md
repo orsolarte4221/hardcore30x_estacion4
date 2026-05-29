@@ -159,3 +159,81 @@
 **Context**: CONSTRUCTION PHASE — U-02 Ingesta y Sanitización — Infrastructure Design APROBADO — PAUSADO
 
 ---
+
+## Decisión Arquitectónica — Reordenamiento del Construction Loop
+**Timestamp**: 2026-05-27T00:00:00Z
+**User Input**: "Las unidades las vamos a dejar pendientes hasta la fase Code Generation. Vamos a pasar a la siguiente unidad."
+**AI Response**: Decisión registrada. Se invierte el Per-Unit Loop estándar del AI-DLC: en lugar de design+code por unidad, se completarán primero todos los diseños (Functional Design + NFR Requirements + Infrastructure Design) de U-03 a U-07, y posteriormente se ejecutará Code Generation por unidad. U-02 Code Generation queda DIFERIDO hasta esa segunda pasada. Se procede a iniciar U-03 Functional Design.
+**Context**: CONSTRUCTION PHASE — Decisión de modo de ejecución
+
+---
+
+## U-03 Functional Design — PART 1 Planning Iniciado
+**Timestamp**: 2026-05-27T00:01:00Z
+**AI Response**: Plan de Functional Design U-03 creado en `aidlc-docs/construction/plans/u03-extraccion-functional-design-plan.md` con preguntas en 7 secciones cubriendo: variables a extraer, división de responsabilidad Document AI vs Claude, modelo de confianza, clasificación de discrepancias, orquestación del pipeline, escalamiento HITL, y estados de cotización. GATE: Esperando respuestas del usuario.
+**Context**: CONSTRUCTION PHASE — U-03 Functional Design — PART 1 Planning
+
+---
+
+## U-03 Functional Design — COMPLETADO Y APROBADO
+**Timestamp**: 2026-05-27T00:01:00Z — 2026-05-27T23:59:00Z
+**User Input**: "Todas las respuestas están dadas. Avancemos en los 3 artefactos del diseño funcional para U02" (se interpretó correctamente como U-03). Confirmación posterior: "Dejemos en 6.2 C y continuemos".
+**AI Response**: 24 preguntas de diseño respondidas y registradas en el plan. 3 artefactos generados en `aidlc-docs/construction/u03-extraccion/functional-design/`:
+- `domain-entities.md`: Extensiones a entidades existentes (VariableExtraida, Discrepancia, Cotizacion, DocumentoPDF) + nueva entidad `LlamadaLLM` para audit trail CISO. Catálogos completos: BIENES (26 vars), SERVICIOS (24 vars), SOFTWARE (28 vars). Estructuras transientes Pydantic. Eventos AuditTrail U-03. Campo nuevo `DocumentoPDF.motivo_error` (TEXT NULLABLE). ENUM `Cotizacion.estado_analisis` extendido con `OMITIDA`.
+- `business-rules.md`: 29 reglas BR-U03-01 a BR-U03-29 cubriendo extracción LLM (Sonnet 4.6 + Opus 4.7 fallback), tool use con schema estricto, anti-EchoLeak (una sesión por PDF), fuzzy matching Gate G3 (ratio ≥ 0.85), HITL escalamiento, clasificación de discrepancias por severidad, OMITIDA para cotizaciones sin PDFs LIMPIO, notificación final + email si escalaciones > umbral.
+- `business-logic-model.md`: 4 módulos — GatewayLLM (C-11) con LLMProvider abstracta + AnthropicProvider, MotorExtraccion (C-03) flujo 6 pasos con chunking, MotorCruce (C-04) con normalización por tipo + inconsistencias internas + severidad, ServicioPipeline (C-09) con Pub/Sub, semáforo asyncio(5), idempotencia y ANALISIS_COMPLETADO.
+
+**Decisiones clave**:
+- Estrategia mixta Sonnet 4.6 + Opus 4.7 (UMBRAL_FALLBACK_OPUS=0.75), LLMProvider extensible
+- Tool use con strict JSON Schema (BR-U03-07, CRITICA)
+- Fuzzy validation post-LLM: rapidfuzz ratio ≥ 0.85 (Gate G3, BR-U03-13)
+- Gate G3: mantener valor LLM con flag, excluir del reporte Comité hasta valor_revisado (BR-U03-15)
+- OMITIDA: nueva cotización estado para 0 PDFs LIMPIO (BR-U03-23)
+- Notificación: ANALISIS_COMPLETADO + email opcional si escalaciones > UMBRAL_EMAIL (BR-U03-27)
+- LlamadaLLM: persistencia completa en S3 para CISO (BR-U03-28)
+
+**Status**: APROBADO — proceeding to NFR Requirements U-03
+**Context**: CONSTRUCTION PHASE — U-03 Extracción, Cruce y Orquestación — Functional Design COMPLETADO
+
+---
+
+## U-03 Functional Design — REVISIÓN INTEGRAL 2026-05-28
+**Timestamp**: 2026-05-28T08:00:00Z — 2026-05-28T22:00:00Z
+**User Input**: Sesión iterativa de re-alineación que cubrió: (1) cuestionamiento sobre flexibilidad/extensibilidad del catálogo de variables; (2) descubrimiento de que las cotizaciones tienen estructura de ÍTEMS (no plana) con IVA variable 0%/5%/19%; (3) clarificación de que el proveedor sube Excel estructurado a SAB y PDFs anexos; (4) confirmación de endpoints SAB reales (`/cotizacion_item/formato/generar` y `/cotizacion/documentos/descargar/{id}`); (5) revisión del schema completo de SAB (`assitant_buy/sab/bd_sab.sql`); (6) clarificación de jerarquía real: `solicitud_bienes` → N `solicitud_cotizacion` por categoría → N `cotizacion` por proveedor; (7) ajuste final de scope MVP a solo BIENES.
+
+**Decisiones del usuario consolidadas (30 totales)**:
+- D1-D20: confirmadas en sesión previa (catálogo dinámico, modelo 2 niveles, IVA por ítem, cruce precio_total anti-fraude, validaciones aritméticas, clasificación LLM en una sola llamada, etc.)
+- D21: Portafolio = `solicitud_bienes` completa (1:1)
+- D22: Identificación por tripleta `(version, fecha_version, id)` pasada desde SAB
+- D23: Nueva entidad `SolicitudCotizacion` (espejo SAB)
+- D24: Sin entidad `Categoria` de nuestro lado
+- D25: Sin entidad `Proveedor` maestra (snapshot en Cotizacion)
+- D26: Trigger SAB = `solicitud_cotizacion.estado=CERRADA + cotizacion.estado=ACEPTADA_PARA_ESTUDIO`
+- D27: Endpoint `POST /portafolios/from-sab`
+- D28: Comparación U-05 por ítem
+- D29: Queries con partition pruning
+- D30: Vista `vista_cuadro_comparativo` SAB como referencia auxiliar
+- D31 (scope MVP): solo BIENES — Servicios y Software fuera del MVP
+
+**Documento de alineación**: `aidlc-docs/construction/u03-extraccion/DescripcionFluo.md` (v3) — describe completamente el sistema, las comparaciones, la jerarquía SAB y los deltas requeridos.
+
+**AI Response**: Re-generación completa de los 3 artefactos de U-03 + nuevo `cross-unit-deltas.md`:
+- `domain-entities.md` (v2): nuevas entidades `CatalogoVariable` (BD editable), `LlamadaLLM`, deltas requeridos `SolicitudCotizacion` / `ItemSolicitud` / `ItemCotizado`. Portafolio con composite key + radicado. DocumentoPDF con `tipo_documento_clasificado` + `confianza_clasificacion` + `extraccion_omitida`. Discrepancia con `INCONSISTENCIA_ARITMETICA` y `item_cotizado_id`. VariableExtraida con `fuente_consolidacion`. 24 variables BIENES como seed data.
+- `business-rules.md` (v2): 40 reglas BR-U03-01 a BR-U03-40. Eliminación de catálogo estático (BR-U03-01 dinámico desde BD). Clasificación + extracción en una sola llamada LLM (BR-U03-08). Tool schema dinámico (BR-U03-09). Consolidación multi-PDF por prioridad×confianza (BR-U03-18). Cache TTL 300s (BR-U03-19). Cruce precio_total anti-fraude (BR-U03-20). Validaciones aritméticas IVA/total unitario/total ítem/cantidad RFQ (BR-U03-22, 23, 24). Filtro estado SAB (BR-U03-29). Endpoint `POST /portafolios/from-sab` (BR-U03-40).
+- `business-logic-model.md` (v2): 5 módulos con flujos detallados. C-11 con cache CatalogoVariable + tool schema dinámico + clasificación+extracción en una llamada. C-03 con flujo de 6 pasos + consolidación multi-PDF separada. C-04 con cruce LLM↔SAB + 5 validaciones aritméticas + inconsistencias internas. C-09 con filtro estado SAB + procesamiento concurrente + reanudación idempotente. Diagrama completo de interacciones.
+- `cross-unit-deltas.md` (NUEVO): deltas U-01 (5 entidades nuevas + 4 ALTER TABLE), U-02 (eliminar ParserExcelSAB, RepositorioSAB expandido con 8 queries reales, endpoint `POST /portafolios/from-sab`, persistencia jerárquica transaccional), U-06 (CRUD CatalogoVariable + seed BIENES). 6 TBDs operacionales (acceso BD SAB, mecanismo SAB UI→endpoint, sincronización de estado, vista cuadro comparativo, concurrencia cache, retención S3).
+
+**Cambios arquitectónicos clave (vs versión previa)**:
+- ❌ `ParserExcelSAB` eliminado — datos ya están en BD SAB `cotizacion_item`
+- ✅ Modelo híbrido REST (binarios) + BD SAB (estructurados)
+- ✅ Jerarquía de 3 niveles: Portafolio → SolicitudCotizacion → Cotizacion → ItemCotizado
+- ✅ Identificación por composite key SAB (no por código de proceso ambiguo)
+- ✅ Variable `precio_total_cotizacion` como único cruce LLM↔SAB (anti-fraude)
+- ✅ IVA dinámico desde tabla `porcentaje_iva` SAB
+- ✅ Catálogo dinámico en nuestra BD editable por Admin
+- ✅ Scope reducido a BIENES (estructura extensible)
+
+**Status**: Artefactos generados, esperando aprobación del usuario sobre el `DescripcionFluo.md` v3 + scope BIENES + cross-unit-deltas.
+**Context**: CONSTRUCTION PHASE — U-03 Functional Design REVISIÓN INTEGRAL COMPLETADA
+
+---

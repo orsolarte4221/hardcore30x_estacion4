@@ -4,7 +4,10 @@
 - **Project Name**: Assistent Buy AI Agent
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-23T21:43:00Z
-- **Current Stage**: CONSTRUCTION PHASE — U-02 Ingesta y Sanitización — Infrastructure Design APROBADO — **PAUSADO (pendiente iniciar Code Generation)**
+- **Current Stage**: CONSTRUCTION PHASE — U-03 Extracción, Cruce y Orquestación — Functional Design REVISADO (esperando aprobación final del usuario)
+
+## Modo de Ejecución (Decisión 2026-05-27)
+El usuario decidió **diferir Code Generation de todas las unidades** y completar primero los diseños (Functional Design + NFR Requirements + Infrastructure Design) de cada unidad. Una vez completados los diseños de U-01 a U-07, se ejecutará Code Generation por unidad en una segunda pasada. Esto invierte el orden estándar del Per-Unit Loop del AI-DLC para esta ejecución.
 
 ## Workspace State
 - **Existing Code**: No
@@ -38,4 +41,47 @@
   - [x] U-02 Functional Design — APROBADO (2026-05-26T21:33:00Z)
   - [x] U-02 NFR Requirements — APROBADO (2026-05-26T22:06:00Z)
   - [x] U-02 Infrastructure Design — APROBADO (2026-05-26T22:39:00Z)
-  - [ ] U-02 Code Generation — PENDIENTE (en pausa por decisión del usuario)
+  - [ ] U-02 Code Generation — DIFERIDO (decisión 2026-05-27 — se ejecuta tras terminar diseños U-03..U-07)
+  - [/] U-03 Functional Design — REVISADO 2026-05-28 (aprobación pendiente; integración con schema SAB real, scope MVP=BIENES)
+  - [ ] U-03 NFR Requirements — PENDIENTE
+  - [ ] U-03 Infrastructure Design — PENDIENTE
+  - [ ] U-03 Code Generation — DIFERIDO
+  - [ ] U-04 Functional Design — PENDIENTE
+  - [ ] U-04 NFR Requirements — PENDIENTE
+  - [ ] U-04 Infrastructure Design — PENDIENTE
+  - [ ] U-04 Code Generation — DIFERIDO
+  - [ ] U-05 Functional Design — PENDIENTE
+  - [ ] U-05 NFR Requirements — PENDIENTE
+  - [ ] U-05 Infrastructure Design — PENDIENTE
+  - [ ] U-05 Code Generation — DIFERIDO
+  - [ ] U-06 Functional Design — PENDIENTE
+  - [ ] U-06 NFR Requirements — PENDIENTE
+  - [ ] U-06 Infrastructure Design — PENDIENTE
+  - [ ] U-06 Code Generation — DIFERIDO
+  - [ ] U-07 Functional Design — PENDIENTE
+  - [ ] U-07 NFR Requirements — PENDIENTE
+  - [ ] U-07 Infrastructure Design — PENDIENTE
+  - [ ] U-07 Code Generation — DIFERIDO
+
+## Cross-Unit Deltas Pendientes (estrategia Opción C — aplicar al iniciar Code Generation)
+
+Estos deltas emergieron durante el diseño de unidades posteriores. **Se aplican al Functional Design de la unidad afectada como paso 1 del plan de Code Generation de esa unidad** (no antes). Durante el diseño de otras unidades, se asumen como ya aplicados.
+
+| Unidad afectada | Archivo de deltas | Sección | Aplicar antes de | Estado |
+|---|---|---|---|---|
+| U-01 | `construction/u03-extraccion/functional-design/cross-unit-deltas.md` | §1 | Code Generation U-01 | PENDIENTE |
+| U-02 | `construction/u03-extraccion/functional-design/cross-unit-deltas.md` | §2 | Code Generation U-02 | PENDIENTE |
+| U-06 | `construction/u03-extraccion/functional-design/cross-unit-deltas.md` | §3 | Code Generation U-06 | PENDIENTE |
+
+**Mecánica de aplicación** (cuando llegue el Code Generation de la unidad):
+1. Leer el archivo de deltas correspondiente
+2. Aplicar los cambios al Functional Design de la unidad (entidades, componentes, flujos)
+3. Re-validar con el usuario el Functional Design actualizado
+4. Generar el código
+
+**Acumulación de nuevos deltas**: durante el diseño de U-04..U-07 pueden emerger más deltas. Se agregan al mismo `cross-unit-deltas.md` (o se crean archivos análogos en las carpetas de las unidades originadoras) y se aplican igualmente al Code Generation correspondiente.
+
+**Banners de aviso colocados en**:
+- `construction/u01-fundacion/functional-design/domain-entities.md` (banner al inicio)
+- `construction/u02-ingesta/functional-design/domain-entities.md` (banner al inicio)
+- `construction/u02-ingesta/functional-design/business-logic-model.md` (banner al inicio)

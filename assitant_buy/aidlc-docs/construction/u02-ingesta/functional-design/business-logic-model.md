@@ -5,6 +5,19 @@
 > **Fecha**: 2026-05-26  
 > **Componentes**: C-01 IngestaConector, C-02 SanitizadorZeroTrust, C-12 RepositorioSAB, C-16 GatewayDocumentAI
 
+> ⚠️ **DELTAS PENDIENTES — APLICAR ANTES DE CODE GENERATION**
+>
+> Los flujos descritos abajo cambian tras la revisión de U-03 (2026-05-28). Ver [`../../u03-extraccion/functional-design/cross-unit-deltas.md`](../../u03-extraccion/functional-design/cross-unit-deltas.md) **§2** para detalle completo.
+>
+> **Cambios resumidos en flujos**:
+> - Trigger: nuevo endpoint `POST /portafolios/from-sab` con tripleta `(version, fecha_version, id)` de `solicitud_bienes`
+> - Flujo `RepositorioSAB`: queries directas a `solicitud_bienes`, `solicitud_cotizacion`, `cotizacion_item`, etc. (no se llama al endpoint Excel)
+> - Flujo `ParserExcelSAB`: ❌ ELIMINADO
+> - Flujo `GatewaySAB`: solo descarga de binarios por `doc_id`
+> - Persistencia jerárquica en transacción única
+>
+> **Aplicación**: paso 1 del plan de Code Generation de U-02.
+
 ---
 
 ## Descripción General
