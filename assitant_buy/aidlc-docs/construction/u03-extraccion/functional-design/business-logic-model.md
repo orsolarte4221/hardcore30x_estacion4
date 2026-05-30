@@ -12,7 +12,7 @@
 
 U-03 implementa el núcleo inteligente del pipeline de análisis con 4 responsabilidades:
 
-1. **GatewayLLM (C-11)** — Abstracción sobre proveedores de IA. Construye el tool schema **dinámico** desde `CatalogoVariable` (cache TTL 300s). Implementa estrategia mixta Sonnet/Opus + clasificación + extracción en una sola llamada.
+1. **GatewayLLM (C-11)** — Abstracción sobre proveedores de IA. Construye el tool schema **dinámico** desde `CatalogoVariable` (lectura directa de BD por PDF, sin cache — BR-U03-19). Implementa estrategia mixta Sonnet/Opus + clasificación + extracción en una sola llamada.
 2. **MotorExtraccion (C-03)** — Extrae variables contractuales y clasifica el documento en una sola pasada LLM. Valida referencias (Gate G3). Consolida resultados entre múltiples PDFs de una misma cotización por prioridad de tipo de documento.
 3. **MotorCruce (C-04)** — Cruza la variable LLM `precio_total_cotizacion` contra Σ(ItemCotizado del SAB) — defensa anti-fraude. Ejecuta validaciones aritméticas determinísticas por ítem sobre datos SAB. Detecta inconsistencias internas entre variables LLM.
 4. **ServicioPipeline (C-09)** — Orquesta procesamiento concurrente por PDF, filtra cotizaciones por estado SAB (`CERRADA` + `ACEPTADA_PARA_ESTUDIO`), gestiona ciclo de vida del portafolio, emite eventos WebSocket, garantiza reanudación idempotente.
@@ -35,20 +35,16 @@ class LLMProvider(ABC):
         ...
 ```
 
-### 1.2 Cache del Catálogo
+### 1.2 Lectura del Catálogo (sin cache — BR-U03-19, revisado por NFR Q5.3)
 
 ```
-C-11 mantiene:
-    _catalogo_cache: list[CatalogoVariable] | None = None
-    _catalogo_cached_at: datetime | None = None
-
-C-11._refrescar_catalogo_si_expiro():
-    si _catalogo_cache es None OR
-       (now() - _catalogo_cached_at).seconds > CATALOGO_TTL_SEGUNDOS (300):
-        _catalogo_cache = SELECT * FROM CatalogoVariable
-                          WHERE activo = TRUE
-                            AND tipo_adquisicion = 'BIENES'  # MVP
-        _catalogo_cached_at = now()
+C-11.obtener_catalogo():
+    # Lectura directa de BD en cada extracción. Sin cache en memoria.
+    # El catálogo es pequeño (~24 variables BIENES) → carga de BD despreciable.
+    # Beneficio: cambios del Admin se reflejan de inmediato (sin ventana de 300s).
+    return SELECT * FROM CatalogoVariable
+           WHERE activo = TRUE
+             AND tipo_adquisicion = 'BIENES'  # MVP
 ```
 
 ### 1.3 Adaptador `AnthropicProvider` — Clasificación + Extracción + Sonnet/Opus
@@ -198,7 +194,7 @@ C-03.extraer(contexto: ContextoExtraccion) → ResultadoClasificacionExtraccion
     ▼
 ╔═══ PASO 3: Llamada al GatewayLLM ═══════════════════════════════════╗
 │                                                                      │
-│ catalogo = await C-11.obtener_catalogo()  # Cache TTL 300s          │
+│ catalogo = await C-11.obtener_catalogo()  # lectura directa BD       │
 │                                                                      │
 │ resultado_llm = await C-11.clasificar_y_extraer(                    │
 │     texto_pdf = texto_pdf,                                           │
@@ -726,7 +722,7 @@ PARA CADA portafolio:
            ▼
     [C-03 MotorExtraccion]  ←→  [C-11 GatewayLLM]
            │                           │
-           │                    Cache CatalogoVariable (TTL 300s)
+           │                    Lee CatalogoVariable de BD (sin cache)
            │                           │
            │                    AnthropicProvider — UNA llamada por PDF:
            │                    ├─ Sonnet 4.6 (primaria, clasifica + extrae)
@@ -782,4 +778,4 @@ PARA CADA portafolio:
 | **US-07** (Escalamiento HITL) | §5.2 ANALISIS_COMPLETADO + email; Gate G3 conserva valor LLM con flag |
 | **US-08** (Estado Incompleto) | §5.2 OMITIDA si sin PDFs LIMPIOS; `motivo_error` derivado de DocumentoPDF |
 | **US-19** (CISO Auditoría) | §1.3 LlamadaLLM → S3 + BD; AuditTrail con eventos LLM_INVOCADO + DOCUMENTO_CLASIFICADO |
-| **US-22** (Admin) | §1.2 cache CatalogoVariable refresca cambios Admin en máximo 5 min |
+| **US-22** (Admin) | §1.2 lectura directa de CatalogoVariable — cambios del Admin se reflejan de inmediato |

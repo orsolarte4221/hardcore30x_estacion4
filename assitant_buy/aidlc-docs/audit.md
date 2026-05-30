@@ -237,3 +237,59 @@
 **Context**: CONSTRUCTION PHASE — U-03 Functional Design REVISIÓN INTEGRAL COMPLETADA
 
 ---
+
+## U-03 Functional Design — APROBADO + Inicio NFR Requirements
+**Timestamp**: 2026-05-29T00:00:00Z
+**User Input**: "Estan aprobados. Pasemos a los NFR Requirements"
+**AI Response**: Functional Design de U-03 (domain-entities v2, business-rules v2 [40 BRs], business-logic-model v2, cross-unit-deltas) marcado como APROBADO en aidlc-state.md. Se inicia la etapa NFR Requirements de U-03 (Per-Unit Loop). Se generó el plan `aidlc-docs/construction/plans/u03-extraccion-nfr-requirements-plan.md` con preguntas en formato [Answer]:, cubriendo: performance/costo LLM (Sonnet+Opus fallback), concurrencia del pipeline (semáforo PDFs), resiliencia (retry backoff LLM, idempotencia), Gates de calidad G1/G3 (tasa escalamiento, anti-alucinación), seguridad (anti-EchoLeak, auditoría LLM en S3 para CISO, cache catálogo), y cobertura de tests + PBTs habilitados (PBT-02/03/07/08/09). GATE: esperando respuestas del usuario.
+**Context**: CONSTRUCTION PHASE — U-03 NFR Requirements START
+
+## U-03 NFR Requirements — Reconciliación con cross-unit-deltas.md §4
+**Timestamp**: 2026-05-29T00:30:00Z
+**User Input**: "tuviste en cuenta este archvivo? @assitant_buy/aidlc-docs/construction/u03-extraccion/functional-design/cross-unit-deltas.md"
+**AI Response**: Reconocido que el plan NFR inicial se basó en business-rules.md y DescripcionFluo.md sin contrastar explícitamente cross-unit-deltas.md. Tras leerlo completo, se mapearon los TBDs de §4: §4.5 (cache C-11 asyncio.Lock → Q5.3), §4.6 retención S3 llm_calls → Q5.1, §4.6 cuota Anthropic capacity planning → NUEVA Q8.1 agregada. Se determinó que §4.1 (BD SAB), §4.2 (endpoint from-sab), §4.3 (sync estado) son NFR de U-02 (U-03 lee de nuestra BD por BR-U03-39) y §4.4 (vista_cuadro_comparativo) es de U-05 — fuera de scope NFR U-03. Se añadió Sección 8 de trazabilidad al plan.
+**Context**: CONSTRUCTION PHASE — U-03 NFR Requirements (Planning)
+
+## U-03 NFR Requirements — Respuestas, Delta FD y Generación de Artefactos
+**Timestamp**: 2026-05-29T01:30:00Z
+**User Input**: "He terminado de responder las preguntas" + (tras análisis de inconsistencias) "Punto 1: sí, C está bien para el piloto."
+**AI Response**: 16 respuestas recibidas: Q1.1=C, Q1.2=A, Q1.3=A, Q2.1=B(3 concurrentes), Q2.2=A, Q3.1=A, Q3.2=A, Q4.1=A, Q4.2=B(sin circuit breaker), Q5.1=A, Q5.2=A, Q5.3=C(sin cache), Q6.1=A, Q6.2=A, Q6.3=A, Q7.1=B(métricas mínimas), Q7.2=A, Q8.1=A.
+
+Se detectaron 3 puntos de coherencia: (1) Q5.3=C contradice BR-U03-19 (cache TTL 300s) — usuario confirmó C; (2) Q2.2-A asumía concurrencia 5 pero Q2.1=B=3 — ajustado, SLA ≤30min se mantiene; (3) Q1.2-A vs Q7.1-B — conciliado: costo se persiste por LlamadaLLM pero no es métrica de dashboard estándar.
+
+DELTA AL FD U-03 (aplicado por confirmación de Q5.3=C): se eliminó el cache del catálogo en C-11. Editados: business-rules.md (BR-U03-19 reescrita "lectura directa sin cache"; BR-U03-09 y BR-U03-01 ajustadas), business-logic-model.md (§1.2 reescrita, líneas 15/201/729/785), domain-entities.md (líneas 47/420), cross-unit-deltas.md (§4.5 marcado RESUELTO — asyncio.Lock ya no aplica).
+
+ARTEFACTOS GENERADOS:
+- `u03-extraccion/nfr-requirements/nfr-requirements.md` — 8 NFRs (NFR-U03-01..08): performance/costo LLM, concurrencia (3 PDFs), resiliencia (retry sin circuit breaker), Gates G3/G1, seguridad (anti-EchoLeak + auditoría CISO + sin cache), observabilidad mínima, cobertura tests + 3 PBTs, capacity planning + GATE cuenta Anthropic. Incluye compliance Security Baseline + PBT.
+- `u03-extraccion/nfr-requirements/tech-stack-decisions.md` — anthropic SDK async, rapidfuzz, Decimal, asyncio.Semaphore(3), sin cache catálogo, hypothesis (PBT-09), env vars nuevas, dependencias prohibidas.
+
+GATE operacional confirmado: usuario NO tiene cuenta Anthropic API (Claude Max no habilita API programática) → Tier 1 → MAX_PDFS_CONCURRENTES=3. Documentado en cross-unit-deltas §4.6 + NFR-U03-08.2.
+
+**Status**: NFR Requirements de U-03 GENERADO. GATE: esperando aprobación del usuario.
+**Context**: CONSTRUCTION PHASE — U-03 NFR Requirements (Generation completada)
+
+## U-03 NFR Requirements APROBADO + Inicio Infrastructure Design
+**Timestamp**: 2026-05-29T02:00:00Z
+**User Input**: "Continua a la siguiente etapa"
+**AI Response**: NFR Requirements de U-03 marcado APROBADO en aidlc-state.md. Inicio de Infrastructure Design (última etapa de diseño de U-03). Se generó el plan `construction/plans/u03-extraccion-infrastructure-design-plan.md` con 6 preguntas focalizadas (la mayoría de infra se hereda de U-01/U-02; U-03 corre in-process). Categorías cubiertas: Compute (sizing App Runner), Storage (lifecycle S3 llm_calls), Networking (egress Anthropic), Monitoring (alarmas CloudWatch Gates G1), Shared (convivencia pipelines U-02/U-03 en contenedor), Secrets (secret Anthropic). GATE: esperando respuestas del usuario.
+**Context**: CONSTRUCTION PHASE — U-03 Infrastructure Design (Planning)
+
+## U-03 Infrastructure Design — Respuestas y Generación de Artefactos
+**Timestamp**: 2026-05-29T03:00:00Z
+**User Input**: "Hemos completado las preguntas"
+**AI Response**: 6 respuestas recibidas (sin inconsistencias): Q1=A (sizing 2vCPU/4GB sin cambio — U-03 es I/O-bound), Q2=A (S3 llm_calls sin lifecycle automático, retención indefinida piloto), Q3=A (egress Anthropic por internet público HTTPS, sin VPC/NAT), Q4=B (solo alarma de errores LLM; escalamiento G1 al AuditTrail/manual), Q5=C (sin gestión explícita de concurrencia U-02/U-03 — asyncio intercala naturalmente, ambos I/O-bound), Q6=A (secret dedicado assitant-buy/anthropic).
+
+ARTEFACTOS GENERADOS:
+- `u03-extraccion/infrastructure-design/infrastructure-design.md` — 11 secciones: hereda infra U-01/U-02; App Runner sin cambio de sizing; Anthropic API como cómputo externo (GATE cuenta API); S3 prefijo llm_calls/ sin lifecycle; egress público; secret assitant-buy/anthropic; 1 alarma CloudWatch (LLMErrorCount); IAM sin cambios (wildcards U-02 ya cubren); costo incremental AWS ~$1.20/mes (tokens Anthropic aparte).
+- `u03-extraccion/infrastructure-design/deployment-architecture.md` — diagramas prod (U-01+U-02+U-03) y dev (docker-compose + LocalStack + Anthropic real/mock), flujo extracción+cruce BackgroundTask, mapping componentes→infra, eventos WebSocket, seguridad infra.
+
+Esta es la última etapa de diseño de U-03. Tras aprobación, U-03 queda con diseños completos (Functional + NFR + Infra). Code Generation diferido (Opción C). Siguiente: diseño de U-04.
+
+**Status**: Infrastructure Design de U-03 GENERADO. GATE: esperando aprobación del usuario.
+**Context**: CONSTRUCTION PHASE — U-03 Infrastructure Design (Generation completada)
+
+## U-03 Infrastructure Design APROBADO — U-03 DISEÑOS COMPLETOS
+**Timestamp**: 2026-05-29T03:30:00Z
+**User Input**: "Listo. Aprobamos lso diseños de U3"
+**AI Response**: Infrastructure Design de U-03 marcado APROBADO. Con esto U-03 queda con TODOS sus diseños completos: Functional Design (v2, schema SAB real, scope BIENES) + NFR Requirements (8 NFRs, delta cache eliminado) + Infrastructure Design (hereda U-01/U-02 + egress Anthropic + secret + S3 llm_calls). Code Generation de U-03 queda DIFERIDO (Opción C). Siguiente etapa del flujo: Functional Design de U-04. Pendiente confirmar con el usuario si continúa con U-04 o cambia de orden.
+**Context**: CONSTRUCTION PHASE — U-03 COMPLETADO (diseños) → transición a U-04

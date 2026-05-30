@@ -279,14 +279,22 @@ Estos no bloquean la aprobación de U-03 Functional Design, pero deben resolvers
 - ¿Su lógica nos sirve como base para U-05 (comparación entre proveedores) o solo como cross-check?
 - Acción: leer la definición de la vista (`bd_sab.sql` línea 3191+) y evaluar al diseñar U-05.
 
-### 4.5 Concurrencia Multi-Portafolio en C-11
+### 4.5 Concurrencia Multi-Portafolio en C-11 — ✅ RESUELTO (NFR Q5.3)
 
-- Cache de catálogo en C-11 es global (no por portafolio). Con concurrencia alta, evaluar si necesita lock o si el `if-expired-then-refresh` es seguro con asyncio. **Recomendación**: usar `asyncio.Lock` en la verificación de expiración para evitar refreshes simultáneos.
+- ~~Cache de catálogo en C-11 es global (no por portafolio). Con concurrencia alta, evaluar si necesita lock...~~
+- **Resuelto por NFR Q5.3 (2026-05-29)**: se eliminó el cache del catálogo. C-11 lee `CatalogoVariable` directo de BD en cada extracción (catálogo pequeño, ~24 variables → carga despreciable). Sin cache no hay condición de carrera → `asyncio.Lock` ya no aplica. BR-U03-19 actualizada en consecuencia.
 
 ### 4.6 Otros
 
 - **Política de retención** del bucket S3 `llm_calls/` (CISO audit): ¿1 año? ¿5 años? ¿lifecycle a Glacier?
-- **Cuota Anthropic API**: capacity planning para peak (varios portafolios concurrentes con N PDFs cada uno).
+- **Cuenta Anthropic API** ⚠️ GATE Code Generation U-03: el usuario no tiene cuenta en `console.anthropic.com` aún. Pasos requeridos antes de Code Generation:
+  1. Crear cuenta en console.anthropic.com
+  2. Configurar método de pago (mínimo $5 para activar Tier 1)
+  3. Generar API key y almacenarla en AWS Secrets Manager
+  4. Verificar tier asignado y calibrar `MAX_PDFS_CONCURRENTES` y `ANTHROPIC_MAX_RETRIES` según límites reales
+  - **NFR provisorios (Tier 1)**: `MAX_PDFS_CONCURRENTES=3`, retry con backoff + `retry-after` (SDK nativo)
+  - **Escalado esperado**: subir a Tier 2 tras $500 de consumo acumulado → habilita `MAX_PDFS_CONCURRENTES=5`
+- **Cuota Anthropic API**: capacity planning para pico (piloto: 1 portafolio × hasta 200 PDFs × ~10K tok = ~50K TPM; Tier 1 cubre justo con concurrencia 3).
 - **Rotación credenciales SAB Keycloak**: política y herramienta.
 
 ---

@@ -21,7 +21,7 @@
 ### BR-U03-01: Catálogo dinámico desde BD — editable por Admin
 - **Severidad**: ALTA
 - **Regla**: El catálogo de variables vive en la tabla `CatalogoVariable` (persistente, editable por Admin desde la UI). El sistema NO usa catálogos hardcoded en código. En el MVP solo están activas variables con `tipo_adquisicion = BIENES`.
-- **Acción**: C-11 carga el catálogo al inicializar el extractor y lo refresca según TTL (BR-U03-19).
+- **Acción**: C-11 lee el catálogo directamente desde BD en cada extracción (BR-U03-19, sin cache).
 - **Refs**: Decisión 21 (Portafolio = `solicitud_bienes`), Decisión 1 (Catálogo dinámico)
 
 ### BR-U03-02: Selección de tipo de adquisición — MVP fijo a BIENES
@@ -69,8 +69,8 @@
 
 ### BR-U03-09: Tool schema dinámico desde CatalogoVariable
 - **Severidad**: CRITICA
-- **Regla**: El `input_schema` del tool use se construye dinámicamente desde el catálogo cacheado en C-11. Cambios en CatalogoVariable (via Admin) se reflejan en el siguiente refresh (TTL 300s — BR-U03-19) sin redeploy.
-- **Refs**: Decisión 1 (catálogo dinámico), Decisión 19 (TTL 300s)
+- **Regla**: El `input_schema` del tool use se construye dinámicamente desde el catálogo leído directo de BD en C-11 (BR-U03-19, sin cache). Cambios en CatalogoVariable (via Admin) se reflejan **inmediatamente** en la siguiente extracción, sin redeploy.
+- **Refs**: Decisión 1 (catálogo dinámico), BR-U03-19 (lectura directa, revisado por NFR Q5.3)
 
 ### BR-U03-10: Prompt con texto entre delimitadores Spotlighting
 - **Severidad**: MEDIA
@@ -150,11 +150,11 @@
 - **Caso especial**: la variable `precio_total_cotizacion` solo se acepta de `COTIZACION_FORMAL` (no de anexos).
 - **Refs**: Decisión 17 (Prioridad por tipo), Decisión 15
 
-### BR-U03-19: Cache TTL del catálogo en C-11
+### BR-U03-19: Lectura directa del catálogo en C-11 (sin cache) — revisado por NFR Q5.3
 - **Severidad**: MEDIA
-- **Regla**: C-11 cachea `CatalogoVariable` en memoria con TTL `CATALOGO_TTL_SEGUNDOS` (default 300). Tras expiración, refresca desde BD en el próximo uso. Sin invalidación push.
-- **Implicación**: cambios Admin se ven en máximo 5 minutos.
-- **Refs**: Decisión 19
+- **Regla**: C-11 lee `CatalogoVariable` directamente desde BD en cada extracción de PDF (`WHERE activo = TRUE AND tipo_adquisicion = 'BIENES'`). **No hay cache en memoria.** El catálogo es pequeño (~24 variables), por lo que la carga de BD es despreciable incluso con concurrencia.
+- **Implicación**: cambios del Admin se reflejan **inmediatamente** (sin ventana de 300s). No se requiere `asyncio.Lock` ni invalidación push.
+- **Refs**: Decisión NFR Q5.3 (2026-05-29) — **anula** la Decisión 19 original (cache TTL 300s)
 
 ---
 

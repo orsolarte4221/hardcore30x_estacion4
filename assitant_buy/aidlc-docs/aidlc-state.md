@@ -4,7 +4,7 @@
 - **Project Name**: Assistent Buy AI Agent
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-23T21:43:00Z
-- **Current Stage**: CONSTRUCTION PHASE — U-03 Extracción, Cruce y Orquestación — Functional Design REVISADO (esperando aprobación final del usuario)
+- **Current Stage**: CONSTRUCTION PHASE — U-03 DISEÑOS COMPLETOS (Functional + NFR + Infra aprobados). Siguiente: U-04 Functional Design (Code Generation diferido — Opción C)
 
 ## Modo de Ejecución (Decisión 2026-05-27)
 El usuario decidió **diferir Code Generation de todas las unidades** y completar primero los diseños (Functional Design + NFR Requirements + Infrastructure Design) de cada unidad. Una vez completados los diseños de U-01 a U-07, se ejecutará Code Generation por unidad en una segunda pasada. Esto invierte el orden estándar del Per-Unit Loop del AI-DLC para esta ejecución.
@@ -12,7 +12,7 @@ El usuario decidió **diferir Code Generation de todas las unidades** y completa
 ## Workspace State
 - **Existing Code**: No
 - **Reverse Engineering Needed**: No (Greenfield)
-- **Workspace Root**: `c:\Users\Orlando\Google Drive\ProjectLife\Estudio\Hardcore30X\Estacion3\assitant_buy`
+- **Workspace Root**: `c:\Users\Orlando\Google Drive\ProjectLife\Estudio\Hardcore30X\hardcore30x_estacion4\assitant_buy`
 - **PRD Available**: Yes — `assitant_buy_prd.md`
 
 ## Code Location Rules
@@ -42,9 +42,9 @@ El usuario decidió **diferir Code Generation de todas las unidades** y completa
   - [x] U-02 NFR Requirements — APROBADO (2026-05-26T22:06:00Z)
   - [x] U-02 Infrastructure Design — APROBADO (2026-05-26T22:39:00Z)
   - [ ] U-02 Code Generation — DIFERIDO (decisión 2026-05-27 — se ejecuta tras terminar diseños U-03..U-07)
-  - [/] U-03 Functional Design — REVISADO 2026-05-28 (aprobación pendiente; integración con schema SAB real, scope MVP=BIENES)
-  - [ ] U-03 NFR Requirements — PENDIENTE
-  - [ ] U-03 Infrastructure Design — PENDIENTE
+  - [x] U-03 Functional Design — APROBADO (2026-05-29; integración con schema SAB real, scope MVP=BIENES)
+  - [x] U-03 NFR Requirements — APROBADO 2026-05-29 (nfr-requirements.md + tech-stack-decisions.md. Nota: Q5.3 generó delta al FD U-03 — cache catálogo eliminado, BR-U03-19 revisada)
+  - [x] U-03 Infrastructure Design — APROBADO 2026-05-29 (infrastructure-design.md + deployment-architecture.md. Hereda infra U-01/U-02; agrega egress Anthropic + secret + prefijo S3 llm_calls). ✅ U-03 con todos sus diseños completos
   - [ ] U-03 Code Generation — DIFERIDO
   - [ ] U-04 Functional Design — PENDIENTE
   - [ ] U-04 NFR Requirements — PENDIENTE

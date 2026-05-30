@@ -44,7 +44,7 @@ Tabla persistente. Reemplaza el catálogo estático en código de la versión an
 | `updated_at` | TIMESTAMP | NOT NULL | UTC |
 | `updated_by` | UUID v7 | NOT NULL, FK → Usuario | Admin que modificó por última vez |
 
-**Cache en C-11 GatewayLLM**: el catálogo se cachea en memoria con TTL de 300s. Cambios desde Admin se reflejan en máximo 5 minutos.
+**Lectura en C-11 GatewayLLM** (BR-U03-19, revisado por NFR Q5.3): el catálogo se lee directamente de BD en cada extracción (sin cache). Cambios desde Admin se reflejan de inmediato.
 
 **Variable especial `precio_total_cotizacion`**:
 - `tipo_dato = MONETARIO`, `criticidad = CRITICA`, `es_cruce_sab = TRUE`
@@ -417,7 +417,7 @@ class EstadoProgresoPipeline:
 ```
 CatalogoVariable (BD, Admin-editable)
     │
-    ▼ (cache TTL 300s)
+    ▼ (lectura directa BD, sin cache)
 C-11 GatewayLLM  ◄── LLMProvider abstracto, MVP solo AnthropicProvider
     │
 DocumentoPDF (LIMPIO, de U-02) ──────────────────────────────────────┐
